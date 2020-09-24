@@ -1,6 +1,7 @@
 package netProxy;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 /*
@@ -25,37 +26,39 @@ public class CookieFilter implements NetFilter {
         byte[] buffer = new byte[1024];
         int count, cnt = 0;
         try {
-        while (true) {
-            cnt++;
-            count = bis.read(buffer);
-            if (count <= 5) {
-                break;
-            }
-            String str = new String(buffer, 0, count, "utf-8");
-            if (cnt < 2) {
-                String[] strArray = str.split("\r\n");
-                for (String s : strArray) {
-                    if (Pattern.matches("Set-Cookie:.*?", s)) {
-                        if ((s.indexOf(dm) == -1) || (s.indexOf(wwwdm) == -1)) {
-                            s = "Set-Cookie: NULL";
-                        }
-                    }
-                    s = s + "\r\n";
-                    bos.write();
-                    System.out.println("s: "  + s);
-                    //s写进outPutStream里
+            while (true) {
+                cnt++;
+                count = bis.read(buffer);
+                if (count <= 5) {
+                    break;
                 }
-            } else {
-                str = str + "\r\n";
-                //bos.write(str);
-                //str直接写outPutStream
-                //System.out.println();
+                String str = new String(buffer, 0, count, StandardCharsets.UTF_8);
+                if (cnt < 2) {
+                    String[] strArray = str.split("\r\n");
+                    for (String s : strArray) {
+                        if (Pattern.matches("Set-Cookie:.*?", s)) {
+                            if ((!s.contains(dm)) || (!s.contains(wwwdm))) {
+                                s = "Set-Cookie: NULL";
+                            }
+                        }
+                        s = s + "\r\n";
+                        out.write(s.getBytes());
+//                        bos.write(str.getBytes());
+                        System.out.println("s: " + s);
+                        //s写进outPutStream里
+//                        out = bos;
+                    }
+                } else {
+                    str = str + "\r\n";
+                    //bos.write(str);
+                    //str直接写outPutStream
+                    //System.out.println();
+                }
             }
-        }
-        bis.close();
-        }catch (IOException e) {
+            bis.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return out;
     }
 }
