@@ -19,6 +19,8 @@ public class CookieFilter implements NetFilter {
         //域名有两种形式，www.baidu.com或者.baidu.com，两种都要做匹配
         String dm = ".baid.com";
         String wwwdm = "www" + dm;
+        //BufferedWriter bw = new BufferedWriter(out);
+        BufferedOutputStream bos = new BufferedOutputStream(out);
         BufferedInputStream bis = new BufferedInputStream(in);
         byte[] buffer = new byte[1024];
         int count, cnt = 0;
@@ -38,10 +40,14 @@ public class CookieFilter implements NetFilter {
                             s = "Set-Cookie: NULL";
                         }
                     }
+                    s = s + "\r\n";
+                    bos.write();
                     System.out.println("s: "  + s);
                     //s写进outPutStream里
                 }
             } else {
+                str = str + "\r\n";
+                //bos.write(str);
                 //str直接写outPutStream
                 //System.out.println();
             }
